@@ -24,7 +24,7 @@ def plotVolPrice(volPriceData, ticker):
     secondary_y=True,)
 
     fig.update_layout(
-    title_text="Past Month Closing Price and Volume for " + ticker)
+    title_text="Past 3-Month Closing Price and Volume for " + ticker)
 
     fig.update_xaxes(title_text="date")
 
@@ -39,12 +39,12 @@ def plotUI(ticker_bucket):
     print("Type 'watchlist' to see detected list")
     print("-" * 38)
     while True:
-        ticker = input("Enter ticker (type quit to return to main menu): ")
+        ticker = input("Enter ticker (type back to return to main menu): ")
         if ticker == "watchlist":
             print(ticker_bucket)
             continue
         ticker = ticker.upper().replace(" ", "")
-        if ticker == "QUIT":
+        if ticker == "BACK":
             break
         data = getVolPriceData(ticker)
         if data.empty:

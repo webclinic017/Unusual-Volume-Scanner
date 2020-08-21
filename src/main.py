@@ -19,10 +19,11 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
+#controls main ui
 def ui():
     print("********WELCOME TO UNUSUAL VOLUME SCANNER*********")
     ticker_urls = scn.readURLs(TXT_PATH)
-    print("-" * 52)
+    print("-" * 50)
     ticker_bucket = []
     while True:
         print("What would you like to do?")

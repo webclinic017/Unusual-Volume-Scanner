@@ -28,10 +28,12 @@ def readURLs(file_path):
         urls = data.readlines()[0].split(',')
     return urls
 
+#get html from url
 async def fetch(session, url):
     async with session.get(url) as response:
         return await response.text()
 
+#add fetch function to event loop
 async def fetch_all(session, urls):
     tasks = []
     for url in urls:
@@ -40,6 +42,7 @@ async def fetch_all(session, urls):
     results = await asyncio.gather(*tasks)
     return results
 
+#return html for urls
 async def getHTMLs(urls):
     async with aiohttp.ClientSession() as session:
         htmls = await fetch_all(session, urls)
@@ -65,10 +68,12 @@ def extractVol(html):
 def getStDev(ticker):
     with main.suppress_stdout():
         data = yf.Ticker(ticker).history(period = '3mo')['Volume']
+    #no data available
     if data.empty:
         return None
     else:
         std = data.std()
+        #check if std returns NaN
         if math.isnan(std):
             return None
         else:
@@ -83,10 +88,13 @@ def printResult(curr_vol, mean_vol, std, multiplier):
     else:
         return False
 
+#determines if result is printed
 def controlPrint(result, multiplier):
+    #volume data is not available
     if 'N/A' in result.values() or "" in result.values():
         return
     std = getStDev(result['ticker'])
+    #std returns NaN float
     if std == None:
         return
     if printResult(result['curr_vol'], result['mean_vol'], std, multiplier):
@@ -105,11 +113,12 @@ def processHTML(htmls, multiplier, ticker_bucket):
             ticker_bucket.append(ticker)
     return ticker_bucket
 
+#controls volume detector module ui
 def scanMarket(ticker_urls, ticker_bucket):
     print("***********VOLUME SCANNER MODULE***********")
     print("Stock whose volume has exceeded the 3-month \navg. by X Std. are printed to the console.")
     print("Choose from the options below.")
-    print("1. Randomly scan 1000 stocks on the market")
+    print("1. Randomly scan 100 stocks on the market")
     print("2. Full market scan (takes about 25 minutes)")
     while True:
         selection = input("What would you like to do?: ")
@@ -123,10 +132,13 @@ def scanMarket(ticker_urls, ticker_bucket):
     print("SCANNING THE MARKET...")
     print("-" * 43)
     if selection == "1":
-        ticker_urls = random.sample(ticker_urls, 50)
+        ticker_urls = random.sample(ticker_urls, 100)
         htmls = asyncio.run(getHTMLs(ticker_urls))
     else:
         htmls = asyncio.run(getHTMLs(ticker_urls))
     ticker_bucket = processHTML(htmls, multiplier, ticker_bucket)
-    print("TICKERS ADDED TO WATCHLIST")
+    if len(ticker_bucket) != 0:
+        print("TICKERS ADDED TO WATCHLIST")
+    else:
+        print("NO UNUSUAL VOLUME FOUND")
     return ticker_bucket
